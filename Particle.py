@@ -14,10 +14,10 @@ class Particle:
 
     def evaluate(self, x, y):
 
-        y_est = self.yEstimated(x,y)
+        y_est = self.yEstimated(x)
 
         diff = [(y1-y2) ** 2 for y1,y2 in zip(y,y_est)]
-        rmse = math.sqrt(sum(diff) / len(x))
+        rmse = math.sqrt(sum(diff) / y.shape[0])
         self.error = rmse
 
         if (self.error < self.err_best) or (self.err_best == -1):
@@ -40,7 +40,7 @@ class Particle:
                 self.velocity[r][i] = (w*self.velocity[r][i]) + vel_cognitive + vel_social
 
     # update the particle position based off new velocity updates
-    def update_position(self,bounds):
+    def update_position(self):
         for r in range(self.num_rules):
             for i in range(self.num_parameters):
                 self.position[r][i]=self.position[r][i]+self.velocity[r][i]
@@ -57,15 +57,26 @@ class Particle:
         return math.exp(-0.5 * ((xx - med) / std) ** 2)
 
 
-    def yEstimated(self, x, y):
+    def yEstimated(self, x):
 
         y_est = []
-        for xx in x:
+        n = len(x.columns)
+        for index, xx in x.iterrows():
             num = 0
             den = 0
             for r in range(self.num_rules):
-                wk = self.gaussianMembership(xx, self.position[r][0], self.position[r][1])
-                yk = self.position[r][2] * xx + self.position[r][3]
+                muks = []
+                wk = 1
+                yk = 0
+                for j in range(n):
+                    xval = xx[x.columns[j]]
+                    muks.append(self.gaussianMembership(xval, self.position[r][(2*j)], self.position[r][(2*j)+1]))
+                    alfa = self.position[r][(2*n)+j]
+
+
+                    yk += alfa * xval
+                yk += self.position[r][(3*n)]
+                wk = min(muks)
                 num += wk * yk
                 #den += wk
 

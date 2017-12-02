@@ -4,44 +4,47 @@ import math
 import matplotlib.pyplot as plt
 
 class PSO():
-    def __init__(self,x,y,nrules, num_particles,maxiter):
+    def __init__(self,x,nrules, num_particles,maxiter):
 
-        err_best_g=-1                 # best error
-        g_best = []                   # best particle
-
+        self.err_best_g=-1                 # best error
+        self.g_best = []                   # best particle
+        self.maxiter = maxiter
         # establish the swarm
-        swarm = []
+        self.swarm = []
         for i in range(0,num_particles):
-            swarm.append(Particle(self.initParticleValuesForHousePrice(self.createParticleVectors(nrules,x), nrules, x)))
+            self.swarm.append(Particle(self.initParticleValuesForHousePrice(self.createParticleVectors(nrules,x), nrules, x)))
 
+    def train(self,x,y):
+        num_particles = len(self.swarm)
         # begin optimization loop
         i=0
-        while i < maxiter:
+        while i < self.maxiter:
             #print i,err_best_g
             # cycle through particles in swarm and evaluate fitness
             for j in range(0,num_particles):
-                swarm[j].evaluate(x,y)
+                self.swarm[j].evaluate(x,y)
 
                 # determine if current particle is the best (globally)
-                if swarm[j].error < err_best_g or err_best_g == -1:
-                    g_best = swarm[j]
-                    err_best_g = float(swarm[j].error)
+                if self.swarm[j].error < self.err_best_g or self.err_best_g == -1:
+                    self.g_best = self.swarm[j]
+                    self.err_best_g = float(self.swarm[j].error)
 
             # cycle through swarm and update velocities and position
             for j in range(0,num_particles):
-                swarm[j].update_velocity(g_best.position)
-                swarm[j].update_position()
+                self.swarm[j].update_velocity(self.g_best.position)
+                self.swarm[j].update_position()
 
             print("Iteracao ",i,"\n")
-            print("Erro RMSE: ",err_best_g,"\n")
+            print("Erro RMSE: ",self.err_best_g,"\n")
             i+=1
 
         # print final results
         print('ERRO FINAL:')
-        print(err_best_g)
-        y_final_est = g_best.yEstimated(x,y)
+        print(self.err_best_g)
+        y_final_est = self.g_best.yEstimated(x)
         plt.plot(x, y)
         plt.plot(x, y_final_est)
+        return self.g_best
 
     def createParticleVectors(self, nrules, x):
         # modelo usa pertinencia gaussiana

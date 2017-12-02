@@ -24,6 +24,14 @@ class Particle:
             self.pos_best = self.position
             self.err_best = self.error
 
+    def test(self, x, y):
+
+        y_est = self.yEstimated(x)
+
+        diff = [(y1-y2) ** 2 for y1,y2 in zip(y,y_est)]
+        rmse = math.sqrt(sum(diff) / y.shape[0])
+        return rmse
+
     # update new particle velocity
     def update_velocity(self,pos_best_g):
         w=0.6       # constant inertia weight (how much to weigh the previous velocity)

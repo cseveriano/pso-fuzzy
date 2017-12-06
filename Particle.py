@@ -1,5 +1,7 @@
 import random
 import math
+from math import sqrt
+from sklearn.metrics import mean_squared_error
 
 class Particle:
     def __init__(self,x0):
@@ -16,8 +18,8 @@ class Particle:
 
         y_est = self.yEstimated(x)
 
-        diff = [(y1-y2) ** 2 for y1,y2 in zip(y,y_est)]
-        rmse = math.sqrt(sum(diff) / y.shape[0])
+        rmse = sqrt(mean_squared_error(y,y_est))
+
         self.error = rmse
 
         if (self.error < self.err_best) or (self.err_best == -1):
